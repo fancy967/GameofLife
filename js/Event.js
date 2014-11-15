@@ -68,7 +68,7 @@ RandomEvent.prototype.commit = function(game) {
                 game.world.cells[i][j].nextLife = this.nextLife.shift();
             }
             else{
-                game.world.cells[i][j].nextLife = Math.random() < 0.5;
+                game.world.cells[i][j].nextLife = Math.random() > 0.6;
             }
         }
     }
@@ -167,7 +167,7 @@ function SpeedEvent(speed,component) {
 SpeedEvent.prototype.commit = function(game) {
     this.previous = game.speed;
     game.speed = this.speed;
-    this.component.value = (this.speed - 100) / 500;
+    this.component.value = (this.speed - 150) / 500;
 };
 
 /*
@@ -175,5 +175,5 @@ SpeedEvent.prototype.commit = function(game) {
  */
 SpeedEvent.prototype.revert = function(game) {
     game.speed = this.previous;
-    this.component.value = (this.previous - 100) / 500;
+    this.component.value = (this.previous - 150) / 500;
 };

@@ -3,7 +3,7 @@
  * undo and redo, the user interface and the world.
  */
 function Game(canWidth, canHeight) {
-    this.speed = 100;
+    this.speed = 150;
     this.eventQueue = [];
     this.undoStack = [];
     this.redoStack = [];

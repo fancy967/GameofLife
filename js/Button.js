@@ -37,7 +37,8 @@ Button.prototype.draw = function(context) {
     context.strokeStyle = "black";
     context.strokeRect(this.x + 0.5, this.y + 0.5, this.w - 1, this.h - 1);
 
-    if((game.start && this.text == "Stop") || (!game.start && this.text != "Stop")) this.disable = false
+    if((game.start && (this.text == "Stop" || this.text == "Undo" || this.text == "Redo"
+        )) || (!game.start && this.text != "Stop")) this.disable = false
     else this.disable = true;
 
     context.fillStyle = this.disable? "grey":"black";

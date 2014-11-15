@@ -15,8 +15,8 @@ Interface.prototype.init = function() {
     this.components.push(new Button(220, 5, "Stop", new ControlEvent(false)));
     this.components.push(new Button(320, 5, "Reset", new ResetEvent()));
     this.components.push(new Button(420, 5, "Random", null));
-    this.components.push(new Button(520, 5, "undo", new UndoEvent()));
-    this.components.push(new Button(620, 5, "redo", new RedoEvent()));
+    this.components.push(new Button(520, 5, "Undo", new UndoEvent()));
+    this.components.push(new Button(620, 5, "Redo", new RedoEvent()));
     this.components.push(new Slider(720, 5, 260, 40, 0));
 };
 
@@ -52,7 +52,7 @@ Interface.prototype.click = function(x, y) {
             // Sliders don't have an event yet, so they're handled explicitly..
             if (this.components[i] instanceof Slider) {
                 var c = this.components[i];
-                return new SpeedEvent(100+ 500* (x - c.x) / c.w,c);
+                return new SpeedEvent(150+ 500* (x - c.x) / c.w,c);
             }else if(this.components[i].disable){
                 return null;
             }else if(this.components[i].text == "Random")
