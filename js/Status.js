@@ -20,28 +20,16 @@ Status.prototype.constructor = Status;
  */
 Status.prototype.draw = function(context) {
     context.save();
-    var life;
     var text;
-    if (game.world.selected) {
-        var cell = game.world.selected;
-        life = cell.life;
-        text = "cell[" + cell.x + ":" + cell.y + "] = " + life;
-    } else {
-        life = game.world.average();
-        text = "average = " + life;
-    }
-    var val = Math.round(255 * life / 100);
-    context.fillStyle = "rgb(0, " + val + ", 0)";
-    context.fillRect(this.x, this.y, this.x + this.w, this.y + this.h);
+    text = "Gen = " + game.generation;
     context.fillStyle = "rgba(255, 255, 255, 0.8)";
-    context.fillRect(this.x, this.y + this.h - 40, this.x + this.w, this.y + this.h);
+    context.fillRect(this.x, this.y, this.w, this.h);
     
     context.fillStyle = "black";
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.font = "12pt Verdana";
-    context.fillText(text, this.x + this.w / 2, this.y + this.h - 20);
-    
-    context.strokeRect(this.x + 0.5, this.y + 0.5, this.x + this.w - 1, this.y + this.h - 1);
+    context.fillText(text, this.x + this.w / 2, this.y + this.h / 2);
+
     context.restore();
 };

@@ -2,9 +2,10 @@
  * Simple button component with a text and an event.
  */
 function Button(x, y, text, event) {
-    Component.call(this, x, y, 120, 30);
+    Component.call(this, x, y, 80, 40);
     this.text = text;
     this.event = event;
+    this.disable = true;
 }
 
 /*
@@ -36,7 +37,10 @@ Button.prototype.draw = function(context) {
     context.strokeStyle = "black";
     context.strokeRect(this.x + 0.5, this.y + 0.5, this.w - 1, this.h - 1);
 
-    context.fillStyle = "black";
+    if((game.start && this.text == "Stop") || (!game.start && this.text != "Stop")) this.disable = false
+    else this.disable = true;
+
+    context.fillStyle = this.disable? "grey":"black";
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.fillText(this.text, this.x + this.w / 2, this.y + this.h / 2);
