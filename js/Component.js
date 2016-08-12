@@ -12,8 +12,14 @@ function Component(x, y, w, h) {
 /*
  * Check whether a coordinate is inside the component or not.
  */
-Component.prototype.within = function(x, y) {
+Component.prototype.within = function (x, y) {
     var dx = x - this.x;
     var dy = y - this.y;
     return dx > 0 && dx < this.w && dy > 0 && dy < this.h;
 };
+
+function extend(parent) {
+    var F = new Function();
+    F.prototype = parent;
+    return new F();
+}

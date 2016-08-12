@@ -11,22 +11,22 @@ function Button(x, y, text, event) {
 /*
  * Inherits from Component
  */
-Button.prototype = new Component();
+Button.prototype = extend(Component.prototype);
 Button.prototype.constructor = Button;
 
 /*
  * Draws the button by combining the text with a filled and an empty rectangle.
  */
-Button.prototype.draw = function(context) {
+Button.prototype.draw = function (context) {
     var fontSize = 12;
-    
+
     context.font = fontSize + "pt Verdana";
     var textSize = context.measureText(this.text);
 
     if (textSize.width + 10 > this.w) {
         this.w = textSize.width + 10;
     }
-    
+
     if (fontSize + 10 > this.h) {
         this.h = fontSize + 10;
     }
@@ -37,11 +37,10 @@ Button.prototype.draw = function(context) {
     context.strokeStyle = "black";
     context.strokeRect(this.x + 0.5, this.y + 0.5, this.w - 1, this.h - 1);
 
-    if((game.start && (this.text == "Stop" || this.text == "Undo" || this.text == "Redo"
-        )) || (!game.start && this.text != "Stop")) this.disable = false
-    else this.disable = true;
+    this.disable = !((game.start && (this.text == "Stop" || this.text == "Undo" || this.text == "Redo"
+    )) || (!game.start && this.text != "Stop"));
 
-    context.fillStyle = this.disable? "grey":"black";
+    context.fillStyle = this.disable ? "grey" : "black";
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.fillText(this.text, this.x + this.w / 2, this.y + this.h / 2);

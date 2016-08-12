@@ -10,14 +10,14 @@ function Slider(x, y, w, h, value) {
 /*
  * Inherits from Component.
  */
-Slider.prototype = new Component();
+Slider.prototype = extend(Component.prototype);
 Slider.prototype.constructor = Slider;
 
 /*
  * Draws the slider, one part is the bar, one part is the handle. Each part
  * consists of a filled and an empty rectangle.
  */
-Slider.prototype.draw = function(context) {
+Slider.prototype.draw = function (context) {
     context.save();
 
     context.fillStyle = "rgb(150, 200, 255)";

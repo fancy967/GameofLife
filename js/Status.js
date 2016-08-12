@@ -9,7 +9,7 @@ function Status(x, y, w, h) {
 /*
  * Inherits from Component.
  */
-Status.prototype = new Component();
+Status.prototype = extend(Component.prototype);
 Status.prototype.constructor = Status;
 
 /*
@@ -18,13 +18,13 @@ Status.prototype.constructor = Status;
  * Then draws a filled rectangle with the according amount of green color as
  * well as a text containing the life as a digit.
  */
-Status.prototype.draw = function(context) {
+Status.prototype.draw = function (context) {
     context.save();
     var text;
     text = "Gen = " + game.generation;
     context.fillStyle = "rgba(255, 255, 255, 0.8)";
     context.fillRect(this.x, this.y, this.w, this.h);
-    
+
     context.fillStyle = "black";
     context.textAlign = "center";
     context.textBaseline = "middle";

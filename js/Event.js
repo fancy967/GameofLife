@@ -1,14 +1,13 @@
 /*
- * Event for selecting a cell in the world. Saves the previously selected cell.
- * Is finished after committing once (no animation), should be kept in the undo
- * redo stacks.
+ * Event for start/stop buttons. These events are committed immediately and
+ * not need be kept in the undo/redo stacks.
  */
-
 function ControlEvent(start) {
     this.needPush = false;
     this.start = start;
     this.finished = true;
-    this.keep = true;
+    this.keep = false;
+    this.isCommit = true;
 }
 
 ControlEvent.prototype.commit = function(game) {
@@ -25,44 +24,57 @@ ControlEvent.prototype.commit = function(game) {
     }
 };
 
+/*
+ * Event for reset all cells to default status in the world. Saves current living cells.
+ * Is finished after executing, should be kept in the undo/redo stacks.
+ */
 function ResetEvent() {
     this.needPush = true;
     this.cell = [];
     this.finished = true;
     this.keep = true;
+    this.isCommit = false;
 }
 
 ResetEvent.prototype.commit = function(game) {
     this.cell = [];
-    for (var i = 0; i < game.world.x; ++i) {
-        for (var j = 0; j < game.world.y; ++j) {
+    for (var i = 0; i < game.world.columns; ++i) {
+        for (var j = 0; j < game.world.rows; ++j) {
             this.cell.push(game.world.cells[i][j].life);
             game.world.cells[i][j].nextLife = false;
         }
     }
     game.generation = 0;
+    game.world.draw();
+    game.interface.draw();
 };
 
 ResetEvent.prototype.revert = function(game) {
-    for (var i = 0; i < game.world.x; ++i) {
-        for (var j = 0; j < game.world.y; ++j) {
+    for (var i = 0; i < game.world.columns; ++i) {
+        for (var j = 0; j < game.world.rows; ++j) {
             game.world.cells[i][j].nextLife = this.cell.shift();
         }
     }
+    game.world.draw();
 };
 
+/*
+ * Event for randomly set status of cells. Saves current living cells. Is finished
+ * after executing, should be kept in the undo/redo stacks.
+ */
 function RandomEvent() {
     this.needPush = true;
     this.priviousLife = [];
     this.nextLife = [];
     this.finished = true;
     this.keep = true;
+    this.isCommit = false;
 }
 
 RandomEvent.prototype.commit = function(game) {
     this.priviousLife = [];
-    for (var i = 0; i < game.world.x; ++i) {
-        for (var j = 0; j < game.world.y; ++j) {
+    for (var i = 0; i < game.world.columns; ++i) {
+        for (var j = 0; j < game.world.rows; ++j) {
             this.priviousLife.push(game.world.cells[i][j].life);
             if (this.nextLife.length > 0){
                 game.world.cells[i][j].nextLife = this.nextLife.shift();
@@ -72,30 +84,39 @@ RandomEvent.prototype.commit = function(game) {
             }
         }
     }
+    game.world.draw();
 };
 
 RandomEvent.prototype.revert = function(game) {
     this.nextLife = [];
-    for (var i = 0; i < game.world.x; ++i) {
-        for (var j = 0; j < game.world.y; ++j) {
+    for (var i = 0; i < game.world.columns; ++i) {
+        for (var j = 0; j < game.world.rows; ++j) {
             this.nextLife.push(game.world.cells[i][j].life);
             game.world.cells[i][j].nextLife = this.priviousLife.shift();
         }
     }
+    game.world.draw();
 };
 
+/*
+ * Event for selecting a cell in the world. Saves the previously selected cell.
+ * Is finished after committing once (no animation), should be kept in the undo
+ * redo stacks.
+ */
 function SelectionEvent(selected) {
     this.needPush = true;
     this.selected = selected;
     this.finished = true;
     this.keep = true;
+    this.isCommit = false;
 }
 
 /*
  * Simply sets the selected cell.
  */
 SelectionEvent.prototype.commit = function(game) {
-    this.selected.nextLife = !this.selected.life;;
+    this.selected.nextLife = !this.selected.life;
+    game.world.draw();
 };
 
 /*
@@ -103,6 +124,7 @@ SelectionEvent.prototype.commit = function(game) {
  */
 SelectionEvent.prototype.revert = function(game) {
     this.selected.nextLife = !this.selected.life;
+    game.world.draw();
 };
 
 /*
@@ -113,6 +135,7 @@ function UndoEvent() {
     this.needPush = true;
     this.finished = true;
     this.keep = false;
+    this.isCommit = false;
 }
 
 /*
@@ -134,6 +157,7 @@ function RedoEvent() {
     this.needPush = true;
     this.finished = true;
     this.keep = false;
+    this.isCommit = false;
 }
 
 /*
@@ -159,15 +183,17 @@ function SpeedEvent(speed,component) {
     this.speed = speed;
     this.finished = true;
     this.keep = true;
+    this.isCommit = false;
 }
 
 /*
- * Gets the previous speed and sets the new speed for cell life updating .
+ * Gets the previous speed and sets the new speed for cell life updating.
  */
 SpeedEvent.prototype.commit = function(game) {
     this.previous = game.speed;
     game.speed = this.speed;
     this.component.value = (this.speed - 150) / 500;
+    game.interface.draw();
 };
 
 /*
@@ -176,4 +202,31 @@ SpeedEvent.prototype.commit = function(game) {
 SpeedEvent.prototype.revert = function(game) {
     game.speed = this.previous;
     this.component.value = (this.previous - 150) / 500;
+    game.interface.draw();
+};
+
+/*
+ * Event for select multi cells at once. If isCommit, no need to commit it in event loop.
+ * Is finished after executing and should not be kept in the stacks.
+ */
+function MultiSelEvent(cells) {
+    this.needPush = true;
+    this.finished = true;
+    this.keep = true;
+    this.isCommit = true;
+    this.cells = cells || [];
+}
+
+MultiSelEvent.prototype.commit = function() {
+    this.cells.forEach(function(cell){
+        cell.nextLife = true;
+    });
+    game.world.draw();
+};
+
+MultiSelEvent.prototype.revert = function() {
+    this.cells.forEach(function(cell){
+        cell.nextLife = false;
+    });
+    game.world.draw();
 };
