@@ -21,9 +21,12 @@ function Game(canWidth, canHeight, size) {
  * world and the user interface, then starts the event loop.
  */
 Game.prototype.init = function () {
-    canvas.addEventListener("mousedown", this.onMouseEvent.bind(this), false);
-    canvas.addEventListener("mousemove", this.onMouseEvent.bind(this), false);
-    canvas.addEventListener("mouseup", this.onMouseEvent.bind(this), false);
+    canvas.addEventListener("mousedown", this.onMouseOrTouchEvent.bind(this), false);
+    canvas.addEventListener("mousemove", this.onMouseOrTouchEvent.bind(this), false);
+    canvas.addEventListener("mouseup", this.onMouseOrTouchEvent.bind(this), false);
+    canvas.addEventListener("touchstart", this.onMouseOrTouchEvent.bind(this), false);
+    canvas.addEventListener("touchmove", this.onMouseOrTouchEvent.bind(this), false);
+    canvas.addEventListener("touchend", this.onMouseOrTouchEvent.bind(this), false);
 
     this.world.init();
     this.interface.init();
@@ -58,21 +61,24 @@ Game.prototype.update = function () {
  * Processes mouse events. Determines whether the world or the user interface
  * has been clicked and delegates the processing accordingly.
  */
-Game.prototype.onMouseEvent = function (e) {
-    var x = e.offsetX;
-    var y = e.offsetY;
+Game.prototype.onMouseOrTouchEvent = function (e) {
+    var x = 0, y = 0;
     var event = null;
-    if(e.type === 'mousedown'){
+    if(e.type === 'mousedown' || (e.type === 'touchstart' && e.targetTouches.length == 1)){
+        x = e.type === 'mousedown'? e.offsetX : e.targetTouches[0].pageX;
+        y = e.type === 'mousedown'? e.offsetY : e.targetTouches[0].pageY;
         if (y < canvas.height - this.btmHeight && this.start) {
             return;
         } else if (y < canvas.height - this.btmHeight) {
             event = this.world.select(x, y);
-            this.multiSelCells.push(event.selected);
+            this.multiSelCells = [event.selected];
         } else {
             event = this.interface.click(x, y);
         }
-    }else if(e.type === 'mousemove'){
+    }else if(e.type === 'mousemove' || (e.type === 'touchmove' && e.targetTouches.length == 1)){
         if (this.multiSelCells.length){
+            x = e.type === 'mousemove'? e.offsetX : e.targetTouches[0].pageX;
+            y = e.type === 'mousemove'? e.offsetY : e.targetTouches[0].pageY;
             if (y < canvas.height - this.btmHeight) {
                 event = this.world.select(x, y);
                 if (this.multiSelCells.indexOf(event.selected) === -1) {
@@ -83,20 +89,19 @@ Game.prototype.onMouseEvent = function (e) {
                 }
             }
         }
-    }else if(e.type === 'mouseup'){
+    }else if(e.type === 'mouseup' || (e.type === 'touchend' && e.targetTouches.length === 0)){
         if (this.multiSelCells.length <= 1) {
             this.multiSelCells = [];
             return;
         }
         event = game.undoStack.pop();
-        if (!event instanceof SelectionEvent || this.multiSelCells.indexOf(event.selected) === -1) {
+        if (event && (!event instanceof SelectionEvent || this.multiSelCells.indexOf(event.selected) === -1)) {
             game.undoStack.push(event);
         }
         event = new MultiSelEvent(this.multiSelCells);
         event.isCommit = true;
         this.multiSelCells = [];
     }
-
     if(event){
         if (event.needPush) {
             this.eventQueue.push(event);
@@ -104,4 +109,6 @@ Game.prototype.onMouseEvent = function (e) {
             event.commit(game);
         }
     }
+    if(e.type === 'touchmove')
+        e.preventDefault();
 };
