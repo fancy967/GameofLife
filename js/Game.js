@@ -109,6 +109,6 @@ Game.prototype.onMouseOrTouchEvent = function (e) {
             event.commit(game);
         }
     }
-    if(e.type === 'touchmove')
+    if(e.type === 'touchstart' || e.type === 'touchmove')
         e.preventDefault();
 };
